@@ -5,17 +5,17 @@
       <div>Lat:&nbsp;{{currentLocation.latitude}}, Lon:&nbsp;{{currentLocation.longitude}}</div>
       <div>Hash:&nbsp;{{currentLocation.geohash}} (Precision: {{geohashPrecision}})</div>
     </div>
-    <location-button></location-button>
+    <bottom-button-bar></bottom-button-bar>
   </div>
 </template>
 
 <script>
-  import LocationButton from './LocationButton'
   import { mapGetters } from 'vuex'
+  import BottomButtonBar from './BottomButtonBar'
 
   export default {
     name: 'MapBox',
-    components: {LocationButton},
+    components: {BottomButtonBar},
     data () {
       return {
         map: undefined
