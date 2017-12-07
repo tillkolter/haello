@@ -18,11 +18,12 @@
     components: {BottomButtonBar},
     data () {
       return {
-        map: undefined
+        map: undefined,
+        userMarkers: {}
       }
     },
     computed: {
-      ...mapGetters(['currentLocation', 'geohashPrecision']),
+      ...mapGetters(['currentLocation', 'geohashPrecision', 'userLocations', 'account']),
       geojson () {
         return [
           {
@@ -48,12 +49,21 @@
       map.addControl(new mapboxgl.NavigationControl())
       this.map = map
     },
+    methods: {
+      createMarker ({latitude, longitude}, account) {
+        let el = document.createElement('div')
+        if (account && account !== this.account) {
+          el.className = 'marker foreign'
+        } else {
+          el.className = 'marker'
+        }
+        return new global.mapboxgl.Marker(el).setLngLat([longitude, latitude]).addTo(this.map)
+      }
+    },
     watch: {
       currentLocation (value) {
         if (value) {
-          let el = document.createElement('div')
-          el.className = 'marker'
-          new global.mapboxgl.Marker(el).setLngLat([this.currentLocation.longitude, this.currentLocation.latitude]).addTo(this.map)
+          this.createMarker(value)
 
           this.map.easeTo({
             center: [
@@ -61,6 +71,15 @@
               value.latitude
             ]
           })
+        }
+      },
+      userLocations (locations) {
+        for (let address in locations) {
+          console.log(`address ${address}`)
+          let location = locations[address]
+          if (!this.userMarkers[address]) {
+            this.userMarkers[address] = this.createMarker(location)
+          }
         }
       }
     }
@@ -95,5 +114,8 @@
     width: 32px;
     height: 32px;
     cursor: pointer;
+    &.foreign {
+      background-color: #2e561e;
+    }
   }
 </style>

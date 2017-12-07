@@ -1,66 +1,106 @@
-pragma solidity ^0.4.17;
-
-import './stringUtils.sol';
+pragma solidity ^0.4.18;
 
 contract UserLocation {
 
     struct LocationUser {
     bytes32 latitude;
     bytes32 longitude;
-    string geohash;
+    bytes32 geohash;
     address user;
+    uint index;
     }
 
     address owner;
 
-    mapping (address => LocationUser) locations;
+    mapping (address => LocationUser) private locations;
 
-    mapping (string => LocationUser[]) geohashUsers;
+    mapping (bytes32 => address[]) private geohashUsers;
+    mapping (bytes32 => uint) private populationSizes;
+
+    event LogNewLocation(address indexed userAddress, bytes32 lat, bytes32 lon, bytes32 geohash);
+    event LogDeleteLocation(address indexed userAddress, uint index, uint size);
 
     function UserLocation() public {
         owner = msg.sender;
     }
 
-    function setLocation(bytes32 latitude, bytes32 longitude, string geohash) public returns (bool) {
-        LocationUser storage userLocation = locations[msg.sender];
-        // If the user location has been tracked but the geohash changed
-        LocationUser[] storage users = geohashUsers[geohash];
-        if (!StringUtils.equal(userLocation.geohash, "")
-            && !StringUtils.equal(userLocation.geohash, geohash)) {
-            for (uint i = 0; i < users.length; i++) {
-                if (users[i].user == msg.sender) {
-                    delete users[i];
-                }
-            }
+    function hasLocation(address userAddress) public constant returns(bool) {
+        if(geohashUsers[locations[userAddress].geohash].length == 0) return false;
+        return (geohashUsers[locations[userAddress].geohash][locations[userAddress].index] == userAddress);
+    }
+
+    function getPopulationSize(bytes32 geohash) private returns (uint) {
+        uint size = populationSizes[geohash];
+        if (size == 0) {
+            size = 1;
+        }
+        return size - 1;
+    }
+
+    function incrementPopulationSize(bytes32 geohash) private returns (uint) {
+        uint size = populationSizes[geohash];
+        if (size == 0) {
+            size = 2;
+        } else {
+            size++;
+        }
+        populationSizes[geohash] = size;
+        return size - 1;
+    }
+
+    function decrementPopulationSize(bytes32 geohash) private returns (uint) {
+        uint size = populationSizes[geohash];
+        require(size > 1);
+        populationSizes[geohash] = size - 1;
+        return size - 1;
+    }
+
+    function setLocation(bytes32 latitude, bytes32 longitude, bytes32 geohash) public returns (bool) {
+//        if (hasLocation(msg.sender)) {
+//            deleteLocation();
+//        }
+
+        locations[msg.sender].latitude = latitude;
+        locations[msg.sender].longitude = longitude;
+        locations[msg.sender].geohash = geohash;
+        locations[msg.sender].user = msg.sender;
+
+        uint size = getPopulationSize(geohash);
+        if (geohashUsers[geohash].length == size) {
+            geohashUsers[geohash].length++;
         }
 
-        userLocation.latitude = latitude;
-        userLocation.longitude = longitude;
-        userLocation.geohash = geohash;
-        userLocation.user = msg.sender;
-        users.push(userLocation);
-        locations[msg.sender] = userLocation;
+        geohashUsers[geohash][size] = msg.sender;
+        locations[msg.sender].index = size;
+        incrementPopulationSize(geohash);
+        LogNewLocation(msg.sender, latitude, longitude, geohash);
         return true;
     }
 
-    function getGeohash() public constant returns (string) {
-         return locations[msg.sender].geohash;
+    function deleteLocation() public returns (uint) {
+        require(hasLocation(msg.sender));
+        uint rowToDelete = locations[msg.sender].index;
+        bytes32 geohash = locations[msg.sender].geohash;
+        address keyToMove = geohashUsers[geohash][geohashUsers[geohash].length-1];
+        geohashUsers[geohash][rowToDelete] = keyToMove;
+        locations[keyToMove].index = rowToDelete;
+
+        uint newSize = decrementPopulationSize(geohash);
+        LogDeleteLocation(msg.sender, rowToDelete, newSize);
+        return rowToDelete;
     }
 
-    function getLatitude() public constant returns (bytes32) {
-        return locations[msg.sender].latitude;
-    }
-
-    function getLongitude() public constant returns (bytes32) {
-        return locations[msg.sender].longitude;
-    }
-
-    function getLocation() public constant returns (bytes32, bytes32, string) {
-        LocationUser l = locations[msg.sender];
+    function getLocation() public constant returns (bytes32, bytes32, bytes32) {
+        LocationUser storage l = locations[msg.sender];
         return (l.latitude, l.longitude, l.geohash);
     }
 
-    function getUsers(string geohash) public constant returns (LocationUser[]) {
+    function getUserLocation(address user) public constant returns (bytes32, bytes32, bytes32) {
+        LocationUser storage l = locations[user];
+        return (l.latitude, l.longitude, l.geohash);
+    }
+
+    function getUsers(bytes32 geohash) public constant returns (address[]) {
         return geohashUsers[geohash];
     }
 
