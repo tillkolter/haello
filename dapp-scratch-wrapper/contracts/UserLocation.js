@@ -10,7 +10,7 @@ class UserLocation {
   constructor (contractManager, options) {
 
     this.contractManager = contractManager
-    this.address = '0xf25186b5081ff5ce73482ad761db0eb0d25abfbf'
+    this.address = '0x345ca3e014aaf5dca488057592ee47305d9b3e10'
     this.genesisBlock = 0
     this.options = {
       getPastEvents: false,
@@ -20,14 +20,6 @@ class UserLocation {
 
     if (!this.address || this.address === 'REPLACE_WITH_CONTRACT_ADDRESS') return new Error('Please provide a contract address')
     this.UserLocation = new global.web3.eth.Contract(UserLocationArtifacts.abi, this.address)
-
-    this.UserLocation.events.allEvents({ fromBlock: 'latest' }, function(error, log) {
-      if (!error) {
-        console.log(`Userlocation Log: ${log}`)
-      } else {
-        console.error(`Userlocation Error: ${error}`)
-      }
-    })
 
   }
 
@@ -85,6 +77,33 @@ class UserLocation {
       console.error(err)
     })
   }
+  getSpendingOffer (_owner) {
+    return this.UserLocation.methods.getSpendingOffer(_owner).call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  owner () {
+    return this.UserLocation.methods.owner().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  isSpending (_owner) {
+    return this.UserLocation.methods.isSpending(_owner).call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
   getLocation () {
     return this.UserLocation.methods.getLocation().call()
       .then((resp) => {
@@ -110,6 +129,22 @@ class UserLocation {
    *
    */
 
+  setSpendingOffer (contractAddress) {
+    if (!this.contractManager.account) return new Error('Unlock Wallet')
+    return this.UserLocation.methods.setSpendingOffer(contractAddress).send({from: this.contractManager.account})
+    .on('transactionHash', (hash) => {
+      console.log(hash)
+      this.loading = true
+    })
+      .then((resp) => {
+      this.loading = false
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      this.loading = false
+      console.error(err)
+    })
+  }
   setLocation (latitude, longitude, geohash) {
     if (!this.contractManager.account) return new Error('Unlock Wallet')
     return this.UserLocation.methods.setLocation(latitude, longitude, geohash).send({from: this.contractManager.account})
@@ -145,22 +180,6 @@ class UserLocation {
   deleteLocation () {
     if (!this.contractManager.account) return new Error('Unlock Wallet')
     return this.UserLocation.methods.deleteLocation().send({from: this.contractManager.account})
-    .on('transactionHash', (hash) => {
-      console.log(hash)
-      this.loading = true
-    })
-      .then((resp) => {
-      this.loading = false
-      console.log(resp)
-      return resp
-    }).catch((err) => {
-      this.loading = false
-      console.error(err)
-    })
-  }
-  LogNewLocation (userAddress, lat, lon, geohash) {
-    if (!this.contractManager.account) return new Error('Unlock Wallet')
-    return this.UserLocation.methods.LogNewLocation(userAddress, lat, lon, geohash).send({from: this.contractManager.account})
     .on('transactionHash', (hash) => {
       console.log(hash)
       this.loading = true

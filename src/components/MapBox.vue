@@ -75,10 +75,9 @@
       },
       userLocations (locations) {
         for (let address in locations) {
-          console.log(`address ${address}`)
           let location = locations[address]
           if (!this.userMarkers[address]) {
-            this.userMarkers[address] = this.createMarker(location)
+            this.userMarkers[address] = this.createMarker(location, address)
           }
         }
       }
@@ -116,6 +115,12 @@
     cursor: pointer;
     &.foreign {
       background-color: #2e561e;
+      &:hover {
+        background-color: lighten(#2e561e, 10)
+      }
+    }
+    &:hover {
+      background-color: lighten(#de3f6b, 10)
     }
   }
 </style>

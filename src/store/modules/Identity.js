@@ -10,9 +10,11 @@ const mutations = {
 }
 
 const actions = {
-  getIdentity ({commit}) {
+  getIdentity ({commit, dispatch}) {
     observeIdentity(function (account) {
       commit('SET_IDENTITY', account)
+      dispatch('getUserSpendingOfferAddress', account)
+      dispatch('getUserLocation', account)
     })
   }
 }

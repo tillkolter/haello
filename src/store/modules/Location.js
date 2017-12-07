@@ -2,8 +2,8 @@ import Geohash from 'latlon-geohash'
 
 import { getLocation, getUserLocation, getUsers, setLocation } from '../../utils/blockchain'
 const state = {
-  latitude: 13.4050,
   longitude: 52.52,
+  latitude: 13.4050,
   geohash: 'u33dc',
   precision: 5,
   userLocations: {}
@@ -11,8 +11,8 @@ const state = {
 
 const mutations = {
   SET_LOCATION (state, args) {
-    state.latitude = args.lat
-    state.longitude = args.lon
+    state.latitude = args.latitude
+    state.longitude = args.longitude
     state.geohash = args.geohash
   },
   ADD_USER_LOCATION (state, args) {
@@ -24,13 +24,16 @@ const mutations = {
 }
 
 const actions = {
-  setLocation ({ commit, state }, {lat, lon}) {
-    let geohash = Geohash.encode(lat, lon, state.precision)
-    setLocation(lat, lon, geohash).then(
-      (data) => {
-        commit('SET_LOCATION', data)
-      }
-    )
+  setLocation ({ commit, state }, {latitude, longitude}) {
+    return new Promise((resolve, reject) => {
+      let geohash = Geohash.encode(latitude, longitude, state.precision)
+      setLocation(latitude, longitude, geohash).then(
+        (data) => {
+          commit('SET_LOCATION', data)
+        }
+      )
+      resolve(geohash)
+    })
   },
   getLocation ({ commit }, args) {
     let address = args.address
@@ -44,6 +47,7 @@ const actions = {
     getUsers(geohash).then(
       (data) => {
         dispatch('getUserLocations', data)
+        dispatch('getUserOffers', data)
       }
     )
   },
@@ -52,13 +56,21 @@ const actions = {
       return data.indexOf(item) === pos
     })
     for (let address in uniqueData) {
-      dispatch('getUserLocation', data[address])
+      dispatch('getUserLocation', uniqueData[address])
     }
   },
-  getUserLocation ({ commit }, address) {
+  getUserLocation ({ commit, getters }, address) {
+    console.log('getUserLocation for ' + address)
     getUserLocation(address).then(
       (location) => {
-        commit('ADD_USER_LOCATION', {address: address, location: location})
+        console.log('retrieved location ' + JSON.stringify(location))
+        if (location) {
+          if (address === getters.account) {
+            commit('SET_LOCATION', location)
+          } else {
+            commit('ADD_USER_LOCATION', {address: address, location: location})
+          }
+        }
       }
     )
   }
@@ -76,9 +88,11 @@ const getters = {
     return state.precision
   },
   userLocations: (state, getters) => {
-    return state.userLocations.filter((user) => {
-      return user.address !== getters.account
-    })
+    let locations = state.userLocations
+    return Object.keys(locations).reduce(function (filtered, key) {
+      if (key !== getters.account) filtered[key] = locations[key]
+      return filtered
+    }, {})
   }
 }
 

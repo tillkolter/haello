@@ -4,7 +4,7 @@ contract CheersContract {
 
     enum ActivityType {Drinks, Tickets, Food}
 
-    address spender;
+    address public spender;
 
     address[] candidates;
 
@@ -14,20 +14,20 @@ contract CheersContract {
 
     mapping (address => uint8) userStates;
 
-    ActivityType[] activities;
+    ActivityType public activity;
 
-    uint maxCandidates;
+    uint public maxCandidates;
 
-    uint firstContactBudget;
+    uint public firstContactBudget;
 
-    function CheersContract(uint _maxCandidates, uint _firstContactReward, ActivityType[] _activities) public payable {
+    function CheersContract(uint _maxCandidates, uint _firstContactReward, ActivityType _activity) public payable {
         // msg.value should be more than first contact reward times the candidates maximum
         require(_maxCandidates == 0 || msg.value > _firstContactReward * _maxCandidates);
 
         spender = msg.sender;
         maxCandidates = _maxCandidates;
         firstContactBudget = _firstContactReward * _maxCandidates;
-        activities = _activities;
+        activity = _activity;
     }
 
     function getCompensation() constant public returns (uint) {
@@ -42,9 +42,9 @@ contract CheersContract {
         require(msg.sender == spender);
     }
 
-    function setActivities(ActivityType[] _activities) public {
+    function setActivity(ActivityType _activity) public {
         require(msg.sender == spender);
-        activities = _activities;
+        activity = _activity;
     }
 
     function addCandidate(address candidate) public {

@@ -1,10 +1,11 @@
 <template>
   <div id="app">
-    <button @click="getUsers">Get Users</button>
-    <button @click="deleteLocation">Delete location</button>
+    <!--<button @click="getUsers">Get Users</button>-->
+    <!--<button @click="deleteLocation">Delete location</button>-->
+    <!--<button @click="getSpendingOffer">Get spending offer</button>-->
     <map-box></map-box>
     <div class="latlon">
-      Fake your location (debug helper)
+      Fake your location (development helper)
       <form @submit.prevent="onSubmit">
         <input type="number" placeholder="latitude" v-model="latitude" step="0.0000001" required/>
         <input type="number" placeholder="longitude" v-model="longitude" step="0.0000001" required/>
@@ -33,7 +34,7 @@
       }
     },
     computed: {
-      ...mapGetters(['currentLocation'])
+      ...mapGetters(['currentLocation', 'account'])
     },
     methods: {
       onSubmit () {
@@ -52,7 +53,15 @@
       },
       deleteLocation () {
         deleteLocation()
+      },
+      getSpendingOffer () {
+        if (this.account) {
+          this.$store.dispatch('getUserSpendingOfferAddress', this.account)
+        }
       }
+    },
+    mounted () {
+      this.$store.dispatch('getIdentity')
     }
   }
 </script>
@@ -65,7 +74,6 @@
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #2c3e50;
     margin-top: 60px;
   }
 </style>

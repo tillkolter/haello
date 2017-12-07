@@ -9,42 +9,50 @@
           <img src="../../assets/if_icon-ios7-minus-outline_211774.svg" />
         </div>
         <div class="btn" @click="selectOption(option)" v-for="option in spendingOptions">
-          <img :src="option" />
+          <img :src="getIconUrl(option)" />
         </div>
       </div>
       <div :class="['btn', spending ? 'active': '']" id="spender-btn">
-        <img @click="openMenu" @touchend.stop.prevent="openMenu" :src="spenderButton" />
+        <img @click="openMenu" @touchend.stop.prevent="openMenu" :src="getIconUrl(currentIndex)" />
       </div>
     </div>
-    <div>
-      <input v-model="spendingBudget" :class="['spending-budget', spending ? 'active': '']" type="number"/>
+    <div v-if="spending" class="spending-info">
+      <div>You are offering {{getOfferText(currentIndex)}}
+      worth of {{getOfferValue()}} ether.
+      </div>
+      <!--<input v-model="spendingBudget" :class="['spending-budget', spending ? 'active': '']" type="number"/>-->
     </div>
   </div>
 </template>
 
 <script>
-  const drinks = require('../../assets/if_champagne_glasses_1_811448.svg')
-  const spendingTypes = [
-    drinks,
-    require('../../assets/if_2_1845738.svg'),
-    require('../../assets/if_sound_speaker_811460.svg')
-  ]
+  import Web3 from 'web3'
+  import { createCheersContract, updateActivity } from '../../utils/blockchain'
+  import { mapGetters } from 'vuex'
+
+  const BN = Web3.utils.BN
+  const spendingTypes = {
+    0: require('../../assets/if_champagne_glasses_1_811448.svg'),
+    1: require('../../assets/if_2_1845738.svg'),
+    2: require('../../assets/if_sound_speaker_811460.svg')
+  }
 
   export default {
     name: 'SpenderButton',
     data () {
       return {
-        spenderButton: drinks,
+        currentIndex: '0',
         showOptions: false,
         spending: false,
         spendingBudget: null
       }
     },
     computed: {
+      ...mapGetters(['currentSpendingOffer']),
       spendingOptions () {
         let vm = this
-        return spendingTypes.filter(function (x) {
-          return x !== vm.spenderButton
+        return Object.keys(spendingTypes).filter(function (x) {
+          return x !== vm.currentIndex
         })
       }
     },
@@ -55,6 +63,10 @@
         } else {
           this.spending = false
         }
+      },
+      currentSpendingOffer (offer) {
+        this.currentIndex = offer.activity
+        this.spending = true
       }
     },
     methods: {
@@ -64,15 +76,58 @@
       hideMenu () {
         this.showOptions = false
       },
-      selectOption (option) {
-        this.spenderButton = option
+      selectOption (activityIndex) {
+        this.currentIndex = activityIndex
         this.showOptions = false
         this.spending = true
+
+        if (!this.currentSpendingOffer) {
+          // For now the contact reward and max candidates are hard coded
+          let maxCandidates = 10
+          let reward = 10000
+          let initialBalance = new BN(1000000000, 10)
+          let data = {
+            maxCandidates: maxCandidates,
+            firstContactReward: reward,
+            activity: parseInt(activityIndex),
+            initialBalance: initialBalance
+          }
+          createCheersContract(data).then(
+            contract => {
+              this.$store.dispatch('setSpendingOffer', contract)
+            }
+          )
+        } else {
+          updateActivity(this.currentSpendingOffer.address, activityIndex).then(
+            () => {
+              let newOffer = Object.assign({}, this.currentSpendingOffer, {activity: parseInt(activityIndex)})
+              this.$store.commit('SET_SPENDING_OFFER', newOffer)
+            }
+          )
+        }
       },
       cancelSpending () {
         this.spending = false
         this.spendingBudget = null
         this.showOptions = false
+      },
+      getIconUrl (index) {
+        return spendingTypes[index]
+      },
+      getOfferText (index) {
+        if (index === '0') {
+          return 'classy drinks'
+        } else if (index === '1') {
+          return 'a fantastic meal'
+        } else if (index === '2') {
+          return 'club entry'
+        }
+        return ''
+      },
+      getOfferValue () {
+        if (this.currentSpendingOffer) {
+          return Web3.utils.fromWei(this.currentSpendingOffer.compensation, 'ether')
+        }
       }
     }
   }
@@ -82,6 +137,12 @@
   #spender-btns {
     margin-left: 16px;
     display: flex;
+    /*pointer-events : none;*/
+    &:hover {
+      #spender-btn {
+        background-color: lighten(#2e561e, 5);
+      }
+    }
   }
   #spender-btn {
     background-color: #2e561e;
@@ -89,6 +150,9 @@
     z-index: 2;
     &.active {
       opacity: 1;
+    }
+    &:hover {
+      background-color: lighten(#2e561e, 5);
     }
   }
   .spending-options {
@@ -123,5 +187,14 @@
     &.active{
       opacity: 1;
     }
+  }
+  .spending-info {
+    background-color: black;
+    opacity: 0.5;
+    padding: 4px;
+    font-size: .8rem;
+    color: white;
+    max-width: 140px;
+    margin: 0 16px
   }
 </style>

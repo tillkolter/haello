@@ -10,7 +10,7 @@ class CheersContract {
   constructor (contractManager, options) {
 
     this.contractManager = contractManager
-    this.address = '0x27e622dc2888fc99ab9438a59ae30089e3556998'
+    this.address = '0x8f0483125fcb9aaaefa9209d8e9d7b9c8b9fb90f'
     this.genesisBlock = 0
     this.options = {
       getPastEvents: false,
@@ -77,6 +77,42 @@ class CheersContract {
       console.error(err)
     })
   }
+  activity () {
+    return this.CheersContract.methods.activity().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  maxCandidates () {
+    return this.CheersContract.methods.maxCandidates().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  firstContactBudget () {
+    return this.CheersContract.methods.firstContactBudget().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  spender () {
+    return this.CheersContract.methods.spender().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
 
   /*
    *
@@ -132,9 +168,9 @@ class CheersContract {
       console.error(err)
     })
   }
-  setActivities (_activities) {
+  setActivity (_activity) {
     if (!this.contractManager.account) return new Error('Unlock Wallet')
-    return this.CheersContract.methods.setActivities(new BN(_activities, 10)).send({from: this.contractManager.account})
+    return this.CheersContract.methods.setActivity(new BN(_activity, 10)).send({from: this.contractManager.account})
     .on('transactionHash', (hash) => {
       console.log(hash)
       this.loading = true
