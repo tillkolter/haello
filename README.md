@@ -1,6 +1,7 @@
 # haello
 
-An app that builds trust and friendship upon strangers. 
+An app that builds trust and friendship upon strangers.
+
 Submission for the æternity æpps hackathon https://blog.aeternity.com/aepps-hackathon-16e2d4f3e7d4
 
 ## Installation
