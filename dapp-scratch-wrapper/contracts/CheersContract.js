@@ -10,7 +10,7 @@ class CheersContract {
   constructor (contractManager, options) {
 
     this.contractManager = contractManager
-    this.address = '0x4e72770760c011647d4873f60a3cf6cdea896cd8'
+    this.address = '0x8f0483125fcb9aaaefa9209d8e9d7b9c8b9fb90f'
     this.genesisBlock = 0
     this.options = {
       getPastEvents: false,
@@ -59,6 +59,15 @@ class CheersContract {
    *
    */
 
+  getCandidates () {
+    return this.CheersContract.methods.getCandidates().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
   getCompensation () {
     return this.CheersContract.methods.getCompensation().call()
       .then((resp) => {
@@ -95,8 +104,26 @@ class CheersContract {
       console.error(err)
     })
   }
+  getCandidatesCount () {
+    return this.CheersContract.methods.getCandidatesCount().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
   firstContactBudget () {
     return this.CheersContract.methods.firstContactBudget().call()
+      .then((resp) => {
+      console.log(resp)
+      return resp
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  isCandidate (userAddress) {
+    return this.CheersContract.methods.isCandidate(userAddress).call()
       .then((resp) => {
       console.log(resp)
       return resp

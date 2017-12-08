@@ -123,7 +123,8 @@ contract UserLocation {
     }
 
     function setSpendingOffer(address contractAddress) public returns (bool){
-        require(msg.sender == owner);
+        // require(msg.sender == owner);
+        // more complex checks for contract later
         cheersIndex.push(contractAddress);
         locations[msg.sender].contractIndex = cheersIndex.length - 1;
         locations[msg.sender].spendingContract = contractAddress;

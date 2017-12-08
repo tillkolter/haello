@@ -67,7 +67,6 @@ export const createCheersContract = (options, transactionCallback, confirmationC
   let initialBalance = options.initialBalance
   let activity = options.activity
   let firstContactReward = options.firstContactReward
-
   if (!transactionCallback) {
     transactionCallback = function (transactionHash) {}
   }
@@ -77,7 +76,6 @@ export const createCheersContract = (options, transactionCallback, confirmationC
   if (!receiptCallback) {
     receiptCallback = function (receipt) {}
   }
-
   let data = CheersContractArtifacts.bytecode
   let params = [maxCandidates, firstContactReward, activity]
   let estimateGas = global.web3.eth.estimateGas(arguments, {data: data})
@@ -136,18 +134,30 @@ export const setSpendingOffer = (address) => new Promise((resolve, reject) => {
   )
 })
 
-export const getSpendingOffer = (address) => new Promise((resolve, reject) => {
-  console.log('get details on spending offer')
+export const getSpendingOffer = (address, sender) => new Promise((resolve, reject) => {
+  console.log(`get details on spending offer for user ${sender}`)
+
   let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, address)
   let getCompensation = contract.methods.getCompensation().call()
   let getSpender = contract.methods.spender().call()
   let getActivity = contract.methods.activity().call()
-  Promise.all([getCompensation, getSpender, getActivity]).then(function ([compensation, spender, activity]) {
+  let getIsCandidate = contract.methods.isCandidate(sender).call({from: sender})
+  let getIsOpen = contract.methods.isOpen().call()
+
+  Promise.all([
+    getCompensation,
+    getSpender,
+    getActivity,
+    getIsCandidate,
+    getIsOpen
+  ]).then(function ([compensation, spender, activity, isCandidate, isOpen]) {
     resolve({
       address: address,
       compensation: compensation,
       spender: spender,
-      activity: activity
+      activity: activity,
+      applied: isCandidate,
+      open: isOpen
     })
   })
 })
@@ -164,9 +174,25 @@ export const getUserSpendingOfferAddress = (address) => new Promise((resolve, re
 
 export const addCandidate = (contractAddress, userAddress) => new Promise((resolve, reject) => {
   let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, contractAddress)
-  contract.methods.addCandidate(userAddress).send({from: userAddress}).then(
+  contract.methods.addCandidate(userAddress)
+    .send({
+      from: userAddress,
+      gas: 2000000,
+      gasPrice: 10000000
+    }).on('transactionHash', (hash) => {
+      console.log(hash)
+    }).then(
     (success) => {
       console.log('success')
     }
   )
+})
+
+export const getCandidates = (contractAddress, sender) => new Promise((resolve, reject) => {
+  let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, contractAddress)
+  contract.methods.getCandidates().call.request({from: sender})
+    .then(resp => resolve(resp))
+    .catch((err) => {
+      console.error(err)
+    })
 })

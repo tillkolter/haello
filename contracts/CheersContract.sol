@@ -12,7 +12,7 @@ contract CheersContract {
 
     address[] cashedOut;
 
-    mapping (address => uint8) userStates;
+    mapping (address => int) userStates;
 
     ActivityType public activity;
 
@@ -78,6 +78,20 @@ contract CheersContract {
         }
         maxCandidates -= profiteersLength;
         return true;
+    }
+
+    function isCandidate(address userAddress) public constant returns (bool) {
+        // require(msg.sender == spender || msg.sender == userAddress);
+        return userStates[userAddress] != 1;
+    }
+
+    function getCandidates() public constant returns (address[]) {
+        require(msg.sender == spender);
+        return candidates;
+    }
+
+    function getCandidatesCount() public constant returns (uint) {
+        return candidates.length;
     }
 
     function kill() public {

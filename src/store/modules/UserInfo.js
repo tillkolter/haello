@@ -21,7 +21,7 @@ const actions = {
       dispatch('getUserLocation', account).then(
         location => dispatch('getUsers', location.geohash)
       )
-      dispatch('setCurrentUser')
+      commit('SET_CURRENT_USER', account)
     })
   }
 }

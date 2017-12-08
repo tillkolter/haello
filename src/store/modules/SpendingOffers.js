@@ -42,7 +42,7 @@ const actions = {
   },
   getSpendingOfferDetails ({commit, getters}, address) {
     console.log(`getSpendingOffer details for ${address}`)
-    getSpendingOffer(address).then(
+    getSpendingOffer(address, getters.account).then(
       offer => {
         console.log(`retrieved spendingOffer details for ${offer}`)
         if (offer.spender === getters.account) {
@@ -68,7 +68,6 @@ const actions = {
 const getters = {
   currentSpendingOffer: state => state.offer,
   userOffers: state => state.userOffers,
-  currentOfferType: (state, getters) => getters.getOfferType(state.offer),
   getOfferType: (state) => (offer) => {
     if (offer) {
       if (offer.activity === '0') {
@@ -81,7 +80,6 @@ const getters = {
     }
     return ''
   },
-  currentOfferValue: (state, getters) => getters.getOfferValue(state.offer),
   getOfferValue: (state) => (offer) => {
     if (offer) {
       return Web3.utils.fromWei(offer.compensation, 'ether')
