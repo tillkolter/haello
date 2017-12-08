@@ -1,5 +1,6 @@
 import Web3 from 'web3'
 import {
+  addCandidate,
   getSpendingOffer, getUserSpendingOfferAddress, observeIdentity,
   setSpendingOffer
 } from '../../utils/blockchain'
@@ -58,6 +59,9 @@ const actions = {
     for (let address in uniqueData) {
       dispatch('getUserSpendingOfferAddress', uniqueData[address])
     }
+  },
+  addCandidate ({commit, getters}, address) {
+    addCandidate(address, getters.account)
   }
 }
 

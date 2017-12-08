@@ -161,3 +161,12 @@ export const getUserSpendingOfferAddress = (address) => new Promise((resolve, re
       }
     })
 })
+
+export const addCandidate = (contractAddress, userAddress) => new Promise((resolve, reject) => {
+  let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, contractAddress)
+  contract.methods.addCandidate(userAddress).send({from: userAddress}).then(
+    (success) => {
+      console.log('success')
+    }
+  )
+})

@@ -47,7 +47,7 @@ contract CheersContract {
         activity = _activity;
     }
 
-    function addCandidate(address candidate) public {
+    function addCandidate(address candidate) public returns (bool){
         require(candidate != spender);
         require(isOpen());
         require(userStates[candidate] == 0);
@@ -55,6 +55,7 @@ contract CheersContract {
         candidates.push(candidate);
         userStates[candidate] = 1;
         candidate.transfer(1 ether / 10000);
+        return true;
     }
 
     function addProfiteer(address _profiteer) public {

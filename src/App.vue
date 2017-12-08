@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <button @click="getUsers">Get Users</button>
-    <button @click="deleteLocation">Delete location</button>
-    <button @click="getSpendingOffer">Get spending offer</button>
+    <!--<button @click="getUsers">Get Users</button>-->
+    <!--<button @click="deleteLocation">Delete location</button>-->
+    <!--<button @click="getSpendingOffer">Get spending offer</button>-->
     <map-box></map-box>
     <div class="latlon">
       Fake your location (development helper)

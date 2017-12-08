@@ -10,7 +10,7 @@ class UserLocation {
   constructor (contractManager, options) {
 
     this.contractManager = contractManager
-    this.address = '0x9fbda871d559710256a2502a2517b794b482db40'
+    this.address = '0xecfcab0a285d3380e488a39b4bb21e777f8a4eac'
     this.genesisBlock = 0
     this.options = {
       getPastEvents: false,

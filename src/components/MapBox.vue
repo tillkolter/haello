@@ -1,9 +1,7 @@
 <template>
   <div id="map-box">
     <div id="map"></div>
-    <div class="top-info">
-      <current-user-info></current-user-info>
-    </div>
+    <current-user-info v-if="currentUserInfo" class="top-info" ></current-user-info>
     <bottom-button-bar></bottom-button-bar>
   </div>
 </template>
@@ -23,7 +21,7 @@
       }
     },
     computed: {
-      ...mapGetters(['currentLocation', 'geohashPrecision', 'userLocations', 'account']),
+      ...mapGetters(['currentLocation', 'userLocations', 'account', 'currentUserInfo']),
       geojson () {
         return [
           {
@@ -106,8 +104,7 @@
     top: 16px;
     left: 16px;
     font-size: 0.9rem;
-    background-color: #111101;
-    opacity: 0.5;
+    background-color: rgba(17, 17, 1, 0.5);
     color: #fff;
     max-width: 280px;
     min-width: 270px;

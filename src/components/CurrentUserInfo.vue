@@ -2,10 +2,10 @@
   <div class="user-info" v-if="currentUserInfo">
     <div class="user-info__header">
       <template v-if="currentUserInfo.address === account">
-        <span>Your Info</span>
+        <span>💗 Your Info</span>
       </template>
       <template v-else>
-        <span>User Info</span>
+        <span>💙 User Info</span>
       </template>
     </div>
     <div class="user-info__basic">
@@ -13,19 +13,17 @@
       <div class="user-info__address">
         <div>Address: {{currentUserInfo.address}}</div>
         <div>Location: {{currentUserInfo.latitude.toFixed(5)}}, {{currentUserInfo.longitude.toFixed(5)}}</div>
-
       </div>
     </div>
     <template v-if="currentUserInfo.offer">
       <div class="user-info__offering">
-        <strong>Offering</strong>
         <div>
-          Type: {{getOfferType(currentUserInfo.offer)}}
-
+          <strong>Offering</strong>
+          <div>Type: {{getOfferType(currentUserInfo.offer)}}</div>
+          <div>Value: {{getOfferValue(currentUserInfo.offer)}} Ether</div>
         </div>
-        <div>
-          Value: {{getOfferValue(currentUserInfo.offer)}} Ether
-
+        <div v-if="currentUserInfo.address !== account" @click="onApply" @touchend="onApply" class="apply-btn">
+          Apply
         </div>
       </div>
     </template>
@@ -42,6 +40,11 @@
     name: 'CurrentUserInfo',
     computed: {
       ...mapGetters(['account', 'currentUserInfo', 'getOfferValue', 'getOfferType'])
+    },
+    methods: {
+      onApply () {
+        this.$store.dispatch('addCandidate', this.account)
+      }
     }
   }
 </script>
@@ -60,11 +63,26 @@
     &__offering {
       margin-top: 8px;
       border: 1px solid #fff;
+      padding: 2px;
+      display: flex;
+      justify-content: space-between;
     }
     &__address {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+    }
+  }
+  .apply-btn {
+    height: 32px;
+    line-height: 32px;
+    margin: auto 0;
+    background-color: lightgreen;
+    color: black;
+    padding: 4px;
+    cursor: pointer;
+    &:hover {
+      background-color: darken(lightgreen, 10);
     }
   }
 </style>
