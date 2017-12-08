@@ -71,10 +71,6 @@ contract UserLocation {
     }
 
     function setLocation(bytes32 latitude, bytes32 longitude, bytes32 geohash) public returns (bool) {
-        //        if (hasLocation(msg.sender)) {
-        //            deleteLocation();
-        //        }
-
         locations[msg.sender].latitude = latitude;
         locations[msg.sender].longitude = longitude;
         locations[msg.sender].geohash = geohash;
