@@ -52,11 +52,13 @@ const actions = {
     )
   },
   getUserLocations ({ dispatch }, data) {
-    let uniqueData = data.filter(function (item, pos) {
-      return data.indexOf(item) === pos
-    })
-    for (let address in uniqueData) {
-      dispatch('getUserLocation', uniqueData[address])
+    if (data) {
+      let uniqueData = data.filter(function (item, pos) {
+        return data.indexOf(item) === pos
+      })
+      for (let address in uniqueData) {
+        dispatch('getUserLocation', uniqueData[address])
+      }
     }
   },
   getUserLocation ({ commit, getters }, address) {
