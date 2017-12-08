@@ -10,7 +10,7 @@ class CheersContract {
   constructor (contractManager, options) {
 
     this.contractManager = contractManager
-    this.address = '0x8f0483125fcb9aaaefa9209d8e9d7b9c8b9fb90f'
+    this.address = '0x30753e4a8aad7f8597332e813735def5dd395028'
     this.genesisBlock = 0
     this.options = {
       getPastEvents: false,
