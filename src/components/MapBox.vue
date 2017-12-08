@@ -2,7 +2,7 @@
   <div id="map-box">
     <div id="map"></div>
     <div class="current-location">
-      <div>Lat:&nbsp;{{currentLocation.latitude}}, Lon:&nbsp;{{currentLocation.longitude}}</div>
+      <div>Lat:&nbsp;{{currentLocation.latitude.toFixed(5)}}, Lon:&nbsp;{{currentLocation.longitude.toFixed(5)}}</div>
       <div>Hash:&nbsp;{{currentLocation.geohash}} (Precision: {{geohashPrecision}})</div>
     </div>
     <bottom-button-bar></bottom-button-bar>

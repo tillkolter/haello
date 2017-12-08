@@ -25,8 +25,8 @@
     components: {MapBox},
     data () {
       return {
-        latitude: '',
-        longitude: '',
+        latitude: 52.470907,
+        longitude: 13.4272532,
         geohash: '',
         currentGeohash: '',
         currentLat: '',
@@ -41,8 +41,8 @@
         this.$store.dispatch(
           'setLocation',
           {
-            lat: parseFloat(this.latitude).toFixed(5),
-            lon: parseFloat(this.longitude).toFixed(5)
+            latitude: parseFloat(this.latitude),
+            longitude: parseFloat(this.longitude)
           })
       },
       getUsers () {

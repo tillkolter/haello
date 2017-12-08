@@ -15,8 +15,8 @@
             vm.$store.dispatch(
               'setLocation',
               {
-                latitude: parseFloat(position.coords.latitude).toFixed(5),
-                longitude: parseFloat(position.coords.longitude).toFixed(5)
+                latitude: parseFloat(position.coords.latitude),
+                longitude: parseFloat(position.coords.longitude)
               }
             ).then((geohash) => {
               vm.$store.dispatch('getUsers', geohash)
