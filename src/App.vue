@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <!--<button @click="getUsers">Get Users</button>-->
-    <!--<button @click="deleteLocation">Delete location</button>-->
-    <!--<button @click="getSpendingOffer">Get spending offer</button>-->
+    <button @click="getUsers">Get Users</button>
+    <button @click="deleteLocation">Delete location</button>
+    <button @click="getSpendingOffer">Get spending offer</button>
     <map-box></map-box>
     <div class="latlon">
       Fake your location (development helper)
@@ -25,8 +25,8 @@
     components: {MapBox},
     data () {
       return {
-        latitude: 52.470907,
-        longitude: 13.4272532,
+        latitude: 52.4697682,
+        longitude: 13.4248817,
         geohash: '',
         currentGeohash: '',
         currentLat: '',

@@ -16,12 +16,6 @@
         <img @click="openMenu" @touchend.stop.prevent="openMenu" :src="getIconUrl(currentIndex)" />
       </div>
     </div>
-    <div v-if="spending" class="spending-info">
-      <div>You are offering {{getOfferText(currentIndex)}}
-      worth of {{getOfferValue()}} ether.
-      </div>
-      <!--<input v-model="spendingBudget" :class="['spending-budget', spending ? 'active': '']" type="number"/>-->
-    </div>
   </div>
 </template>
 
@@ -123,11 +117,6 @@
           return 'club entry'
         }
         return ''
-      },
-      getOfferValue () {
-        if (this.currentSpendingOffer) {
-          return Web3.utils.fromWei(this.currentSpendingOffer.compensation, 'ether')
-        }
       }
     }
   }

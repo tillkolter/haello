@@ -30,6 +30,7 @@ const actions = {
       setLocation(latitude, longitude, geohash).then(
         (data) => {
           commit('SET_LOCATION', data)
+          commit('ADD_USER_LOCATION', {address: state.account, location: location})
         }
       )
       resolve(geohash)
@@ -61,21 +62,20 @@ const actions = {
       }
     }
   },
-  getUserLocation ({ commit, getters }, address) {
-    console.log('getUserLocation for ' + address)
+  getUserLocation: ({ commit, getters }, address) => new Promise((resolve, reject) => {
     getUserLocation(address).then(
       (location) => {
         console.log('retrieved location ' + JSON.stringify(location))
         if (location) {
           if (address === getters.account) {
             commit('SET_LOCATION', location)
-          } else {
-            commit('ADD_USER_LOCATION', {address: address, location: location})
           }
+          commit('ADD_USER_LOCATION', {address: address, location: location})
+          resolve(location)
         }
       }
     )
-  }
+  })
 }
 
 const getters = {
@@ -91,10 +91,11 @@ const getters = {
   },
   userLocations: (state, getters) => {
     let locations = state.userLocations
-    return Object.keys(locations).reduce(function (filtered, key) {
-      if (key !== getters.account) filtered[key] = locations[key]
-      return filtered
-    }, {})
+    return locations
+    // return Object.keys(locations).reduce(function (filtered, key) {
+    //   if (key !== getters.account) filtered[key] = locations[key]
+    //   return filtered
+    // }, {})
   }
 }
 

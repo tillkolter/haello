@@ -1,9 +1,8 @@
 <template>
   <div id="map-box">
     <div id="map"></div>
-    <div class="current-location">
-      <div>Lat:&nbsp;{{currentLocation.latitude.toFixed(5)}}, Lon:&nbsp;{{currentLocation.longitude.toFixed(5)}}</div>
-      <div>Hash:&nbsp;{{currentLocation.geohash}} (Precision: {{geohashPrecision}})</div>
+    <div class="top-info">
+      <current-user-info></current-user-info>
     </div>
     <bottom-button-bar></bottom-button-bar>
   </div>
@@ -12,10 +11,11 @@
 <script>
   import { mapGetters } from 'vuex'
   import BottomButtonBar from './BottomButtonBar'
+  import CurrentUserInfo from './CurrentUserInfo'
 
   export default {
     name: 'MapBox',
-    components: {BottomButtonBar},
+    components: {CurrentUserInfo, BottomButtonBar},
     data () {
       return {
         map: undefined,
@@ -57,7 +57,15 @@
         } else {
           el.className = 'marker'
         }
+        el.addEventListener('click', this.markerClickFunction(account))
+        el.addEventListener('touchend', this.markerClickFunction(account))
         return new global.mapboxgl.Marker(el).setLngLat([longitude, latitude]).addTo(this.map)
+      },
+      markerClickFunction (account) {
+        let vm = this
+        return (e) => {
+          vm.$store.commit('SET_CURRENT_USER', account)
+        }
       }
     },
     watch: {
@@ -93,16 +101,16 @@
       position: relative;
     }
   }
-  .current-location {
+  .top-info {
     position: absolute;
     top: 16px;
     left: 16px;
-    font-size: 18px;
-    white-space: pre-wrap;
+    font-size: 0.9rem;
     background-color: #111101;
     opacity: 0.5;
     color: #fff;
-    max-width: 290px;
+    max-width: 280px;
+    min-width: 270px;
     padding: 8px;
   }
   .marker {

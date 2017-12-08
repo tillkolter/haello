@@ -1,11 +1,15 @@
 import { observeIdentity } from '../../utils/blockchain'
 const state = {
-  account: undefined
+  account: undefined,
+  currentUserAddress: undefined
 }
 
 const mutations = {
-  'SET_IDENTITY' (state, account) {
+  SET_IDENTITY (state, account) {
     state.account = account
+  },
+  SET_CURRENT_USER (state, address) {
+    state.currentUserAddress = address
   }
 }
 
@@ -14,13 +18,26 @@ const actions = {
     observeIdentity(function (account) {
       commit('SET_IDENTITY', account)
       dispatch('getUserSpendingOfferAddress', account)
-      dispatch('getUserLocation', account)
+      dispatch('getUserLocation', account).then(
+        location => dispatch('getUsers', location.geohash)
+      )
+      dispatch('setCurrentUser')
     })
   }
 }
 
 const getters = {
-  account: state => state.account
+  account: state => state.account,
+  currentUserInfo: (state, getters) => {
+    let address = state.currentUserAddress
+    let currentUserOffer = getters.userOffers[address]
+    let location = getters.userLocations[address]
+    let userInfo = Object.assign({address: address}, location)
+    if (currentUserOffer) {
+      userInfo['offer'] = currentUserOffer
+    }
+    return userInfo
+  }
 }
 
 export default {

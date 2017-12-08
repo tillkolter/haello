@@ -27,6 +27,7 @@
     }
   }
   .btn {
+    min-width: 72px;
     width: 72px;
     height: 72px;
     border-radius: 36px;

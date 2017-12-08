@@ -137,6 +137,7 @@ export const setSpendingOffer = (address) => new Promise((resolve, reject) => {
 })
 
 export const getSpendingOffer = (address) => new Promise((resolve, reject) => {
+  console.log('get details on spending offer')
   let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, address)
   let getCompensation = contract.methods.getCompensation().call()
   let getSpender = contract.methods.spender().call()
