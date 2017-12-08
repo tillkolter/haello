@@ -43,7 +43,7 @@
         container: 'map',
         style: 'mapbox://styles/mapbox/light-v9',
         center: [this.currentLocation.latitude, this.currentLocation.longitude],
-        zoom: 15,
+        zoom: 13,
         minZoom: 7
       })
       map.addControl(new mapboxgl.NavigationControl())
