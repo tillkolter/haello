@@ -47,24 +47,25 @@ contract CheersContract {
         activity = _activity;
     }
 
-    function addCandidate(address candidate) public returns (bool){
+    function addCandidate(address candidate) public returns (bool) {
         require(candidate != spender);
         require(isOpen());
         require(userStates[candidate] == 0);
 
         candidates.push(candidate);
         userStates[candidate] = 1;
-        candidate.transfer(1 ether / 10000);
+        candidate.transfer(firstContactBudget / maxCandidates);
         return true;
     }
 
-    function addProfiteer(address _profiteer) public {
+    function addProfiteer(address _profiteer) public returns (bool) {
         require(msg.sender == spender);
         require(isOpen() || userStates[_profiteer] == 1);
         require(userStates[_profiteer] < 2);
 
         profiteers.push(_profiteer);
         userStates[_profiteer] = 2;
+        return true;
     }
 
     function cashOut() public returns (bool) {
@@ -82,7 +83,7 @@ contract CheersContract {
 
     function isCandidate(address userAddress) public constant returns (bool) {
         // require(msg.sender == spender || msg.sender == userAddress);
-        return userStates[userAddress] != 1;
+        return userStates[userAddress] != 0;
     }
 
     function getCandidates() public constant returns (address[]) {

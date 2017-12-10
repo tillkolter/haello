@@ -14,6 +14,7 @@ export const setLocation = (latitude, longitude, geohash) => new Promise((resolv
     return contractManager.UserLocation.getUserLocation(contractManager.account).then((location) => {
       let lat = web3.utils.toAscii(location[0]).replace('/\0/g', '')
       let lon = web3.utils.toAscii(location[1]).replace('/\0/g', '')
+
       resolve({
         latitude: parseFloat(lat),
         longitude: parseFloat(lon),
@@ -136,13 +137,14 @@ export const setSpendingOffer = (address) => new Promise((resolve, reject) => {
 
 export const getSpendingOffer = (address, sender) => new Promise((resolve, reject) => {
   console.log(`get details on spending offer for user ${sender}`)
-
   let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, address)
   let getCompensation = contract.methods.getCompensation().call()
   let getSpender = contract.methods.spender().call()
   let getActivity = contract.methods.activity().call()
   let getIsCandidate = contract.methods.isCandidate(sender).call({from: sender})
   let getIsOpen = contract.methods.isOpen().call()
+
+  console.log('getIsCandidate ' + sender)
 
   Promise.all([
     getCompensation,
@@ -174,6 +176,7 @@ export const getUserSpendingOfferAddress = (address) => new Promise((resolve, re
 
 export const addCandidate = (contractAddress, userAddress) => new Promise((resolve, reject) => {
   let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, contractAddress)
+  console.log('addCandidate ' + userAddress)
   contract.methods.addCandidate(userAddress)
     .send({
       from: userAddress,
@@ -190,7 +193,28 @@ export const addCandidate = (contractAddress, userAddress) => new Promise((resol
 
 export const getCandidates = (contractAddress, sender) => new Promise((resolve, reject) => {
   let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, contractAddress)
-  contract.methods.getCandidates().call.request({from: sender})
+  contract.methods.getCandidates().call({from: sender})
+    .then(resp => resolve(resp))
+    .catch((err) => {
+      console.error(err)
+    })
+})
+
+export const selectCandidate = (contractAddress, candidate, sender) => new Promise((resolve, reject) => {
+  let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, contractAddress)
+
+  contract.methods.addProfiteer(candidate).send({from: sender})
+    .then(resp => resolve(resp))
+    .catch((err) => {
+      console.error(err)
+    })
+})
+
+export const cashOut = (contractAddress, sender) => new Promise((resolve, reject) => {
+  let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, contractAddress)
+
+  contract.methods.cashOut().send({from: sender})
+    .on('transactionHash', (hash) => console.log('cashOut hash: ' + hash))
     .then(resp => resolve(resp))
     .catch((err) => {
       console.error(err)

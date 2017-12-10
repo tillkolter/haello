@@ -68,7 +68,7 @@
     },
     watch: {
       currentLocation (value) {
-        if (value) {
+        if (value && value.latitude && value.longitude) {
           this.createMarker(value)
 
           this.map.easeTo({

@@ -30,7 +30,7 @@ const actions = {
       setLocation(latitude, longitude, geohash).then(
         (data) => {
           commit('SET_LOCATION', data)
-          commit('ADD_USER_LOCATION', {address: state.account, location: location})
+          commit('ADD_USER_LOCATION', {address: state.account, location: data})
         }
       )
       resolve(geohash)

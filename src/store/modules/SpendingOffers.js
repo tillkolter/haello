@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 import {
-  addCandidate,
+  addCandidate, getCandidates,
   getSpendingOffer, getUserSpendingOfferAddress, observeIdentity,
   setSpendingOffer
 } from '../../utils/blockchain'
@@ -18,6 +18,12 @@ const mutations = {
     let userAddress = offer.spender
     state.userOffers[userAddress] = offer
     state.userOffers = Object.assign({}, state.userOffers)
+  },
+  'SET_SPENDING_CANDIDATES' (state, {user, address, candidates}) {
+    let offer = state.userOffers[user]
+    if (offer) {
+      offer.candidates = candidates
+    }
   }
 }
 
@@ -30,17 +36,17 @@ const actions = {
   setSpendingOffer ({commit}, offer) {
     setSpendingOffer(offer.options.address)
   },
-  getUserSpendingOfferAddress ({commit, dispatch}, account) {
+  getUserSpendingOfferAddress ({commit, getters, dispatch}, account) {
     getUserSpendingOfferAddress(account).then(
       data => {
         if (data) {
           console.log(`Found spending offer ${data} for user with address ${account}`)
-          dispatch('getSpendingOfferDetails', data)
+          dispatch('getSpendingOfferDetails', {address: data, isOwner: account === getters.account})
         }
       }
     )
   },
-  getSpendingOfferDetails ({commit, getters}, address) {
+  getSpendingOfferDetails ({commit, getters}, {address, isOwner}) {
     console.log(`getSpendingOffer details for ${address}`)
     getSpendingOffer(address, getters.account).then(
       offer => {
@@ -51,6 +57,14 @@ const actions = {
         commit('ADD_USER_SPENDING_OFFER', offer)
       }
     )
+    if (isOwner) {
+      console.log('get candidates')
+      getCandidates(address, getters.account).then(
+        candidates => {
+          commit('SET_SPENDING_CANDIDATES', {user: getters.account, address, candidates})
+        }
+      )
+    }
   },
   getUserOffers ({commit, dispatch}, userAddresses) {
     let uniqueData = userAddresses.filter(function (item, pos) {
