@@ -91,7 +91,7 @@ export const createCheersContract = (options, transactionCallback, confirmationC
         // something seems wrong with the current gas estimation or I am just too stupid
         // so I fix it for now with a high (but not too high) enough number
         gas: 2000000,
-        gasPrice: 10000000,
+        gasPrice: gasPrice,
         value: initialBalance
         // gas: gasEstimate,
         // gasPrice: gasPrice
