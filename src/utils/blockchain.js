@@ -79,38 +79,31 @@ export const createCheersContract = (options, transactionCallback, confirmationC
   }
   let data = CheersContractArtifacts.bytecode
   let params = [maxCandidates, firstContactReward, activity]
-  let estimateGas = global.web3.eth.estimateGas(arguments, {data: data})
-  let estimateGasPrice = global.web3.eth.getGasPrice()
-  Promise.all([estimateGas, estimateGasPrice])
-    .then(([gasEstimate, gasPrice]) => {
-      contractManager.CheersContract.CheersContract.deploy({
-        data: data,
-        arguments: params
-      }).send({
-        from: contractManager.account,
-        // something seems wrong with the current gas estimation or I am just too stupid
-        // so I fix it for now with a high (but not too high) enough number
-        gas: 2000000,
-        gasPrice: gasPrice,
-        value: initialBalance
-        // gas: gasEstimate,
-        // gasPrice: gasPrice
-      }, function (error, transactionHash) {
-        if (error) {
-          console.error('The contract could not be created. Please make sure ' +
-            'that you send enough ether to the contract. It has to be at ' +
-            'least one more than the contact reward times the maximum candidates')
-        }
-      })
-        .on('error', function (error) {
-          reject(error)
-        })
-        .on('transactionHash', transactionCallback)
-        .on('receipt', receiptCallback)
-        .on('confirmation', confirmationCallback)
-        .then(function (newContractInstance) {
-          resolve(newContractInstance) // instance with the new contract address
-        })
+
+  let cheersContract = new global.web3.eth.Contract(CheersContractArtifacts.abi)
+  cheersContract.deploy({
+    data: data,
+    arguments: params
+  }).send({
+    from: contractManager.account,
+    value: initialBalance
+  }, function (error, transactionHash) {
+    if (error) {
+      console.error('The contract could not be created. Please make sure ' +
+        'that you send enough ether to the contract. It has to be at ' +
+        'least one more than the contact reward times the maximum candidates')
+    } else {
+      console.log(`Transaction hash for contract creation ${transactionHash}`)
+    }
+  })
+    .on('error', function (error) {
+      reject(error)
+    })
+    .on('transactionHash', transactionCallback)
+    .on('receipt', receiptCallback)
+    .on('confirmation', confirmationCallback)
+    .then(function (newContractInstance) {
+      resolve(newContractInstance) // instance with the new contract address
     })
 })
 

@@ -82,13 +82,33 @@ contract CheersContract {
     }
 
     function isCandidate(address userAddress) public constant returns (bool) {
-        // require(msg.sender == spender || msg.sender == userAddress);
-        return userStates[userAddress] != 0;
+        require(msg.sender == spender || msg.sender == userAddress);
+        return userStates[userAddress] == 1;
+    }
+
+    function isCashedOut(address userAddress) public constant returns (bool) {
+        require(msg.sender == spender || msg.sender == userAddress);
+        return userStates[userAddress] == 3;
+    }
+
+    function isProfiteer(address userAddress) public constant returns (bool) {
+        require(msg.sender == spender || msg.sender == userAddress);
+        return userStates[userAddress] == 2;
     }
 
     function getCandidates() public constant returns (address[]) {
         require(msg.sender == spender);
         return candidates;
+    }
+
+    function getProfiteers() public constant returns (address[]) {
+        require(msg.sender == spender);
+        return profiteers;
+    }
+
+    function getCashedOuts() public constant returns (address[]) {
+        require(msg.sender == spender);
+        return cashedOut;
     }
 
     function getCandidatesCount() public constant returns (uint) {
