@@ -6,7 +6,7 @@ const BN = Web3.utils.BN
 import ZeroClientProvider from 'web3-provider-engine/zero.js'
 import IdManagerProvider from '@aeternity/id-manager-provider'
 
-var addresses = require('../addresses')
+var addresses = require('../../addresses')
 
 class UserLocation {
   constructor (contractManager, options) {
