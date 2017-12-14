@@ -6,11 +6,13 @@ const BN = Web3.utils.BN
 import ZeroClientProvider from 'web3-provider-engine/zero.js'
 import IdManagerProvider from '@aeternity/id-manager-provider'
 
+var addresses = require('../addresses')
+
 class UserLocation {
   constructor (contractManager, options) {
 
     this.contractManager = contractManager
-    this.address = '0x35b338b4ade005f25a8982a597638827b8617ad4'
+    this.address = addresses.UserLocation
     this.genesisBlock = 0
     this.options = {
       getPastEvents: false,
