@@ -177,6 +177,10 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+      margin-top: 8px;
+      &:last-child {
+        margin-top: inherit;
+      }
     }
     &__select {
       background-color: lightgreen;
@@ -184,6 +188,7 @@
       padding: 2px;
       cursor: pointer;
       border-radius: 4px;
+      margin: 4px;
       &:hover {
         background-color: darken(lightgreen, 20);
       }
