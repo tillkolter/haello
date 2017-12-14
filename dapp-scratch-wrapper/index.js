@@ -33,11 +33,16 @@ class ContractManager {
     return new Promise((resolve, reject) => {
 
       let web3Provider = false
-      let idManager = new IdManagerProvider({
-        rpcUrl: 'http://localhost:9545/',
-        skipSecurity: true
+      let idManager;
+      if (process.ENV.NODE_ENV === 'production') {
+        idManager = new IdManagerProvider()
+      } else {
+        idManager = new IdManagerProvider({
+          rpcUrl: 'http://localhost:9545/',
+          skipSecurity: true
 
-      })
+        })
+      }
 
       idManager.checkIdManager().then((idManagerPresent)=>{
         // check for aedentity app
