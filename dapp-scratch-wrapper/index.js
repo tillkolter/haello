@@ -34,7 +34,7 @@ class ContractManager {
 
       let web3Provider = false
       let idManager;
-      if (process.ENV.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV === 'production') {
         idManager = new IdManagerProvider()
       } else {
         idManager = new IdManagerProvider({
