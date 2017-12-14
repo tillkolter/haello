@@ -140,12 +140,16 @@
   }
 
   .apply-btn {
-    height: 32px;
-    line-height: 32px;
     background-color: lightgreen;
     color: black;
     padding: 4px;
     cursor: pointer;
+    width: 60px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 2px;
+    margin-left: auto;
     &:hover {
       background-color: darken(lightgreen, 10);
     }
