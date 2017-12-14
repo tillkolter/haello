@@ -14,6 +14,7 @@ npm install
 Install Truffle and deploy contracts:
 ```
 npm install -g truffle
+npm install -g truffle-hdwallet-provider
 truffle migrate
 ```
 
