@@ -7,6 +7,7 @@ import contracts from './contracts'
 
 class ContractManager {
   constructor (options) {
+    this.web3 = null
     this.pollingInterval = null
     this.account = null
     this.unlocked = false
@@ -33,6 +34,9 @@ class ContractManager {
 
       let web3Provider = false
       let idManager = new IdManagerProvider({
+        rpcUrl: 'http://localhost:9545/',
+        skipSecurity: true
+
       })
 
       idManager.checkIdManager().then((idManagerPresent)=>{
@@ -66,6 +70,7 @@ class ContractManager {
 
         if (web3Provider) {
           global.web3 = new Web3(web3Provider)
+          this.web3 = new Web3(web3Provider)
           this.startChecking()
 
           if (this.options.getPastEvents) this.getPastEvents()

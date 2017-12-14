@@ -1,4 +1,4 @@
-import { observeIdentity } from '../../utils/blockchain'
+import { hasLocation, observeIdentity } from '../../utils/blockchain'
 const state = {
   account: undefined,
   currentUserAddress: undefined
@@ -18,8 +18,14 @@ const actions = {
     observeIdentity(function (account) {
       commit('SET_IDENTITY', account)
       dispatch('getUserSpendingOfferAddress', account)
-      dispatch('getUserLocation', account).then(
-        location => dispatch('getUsers', location.geohash)
+      hasLocation(account).then(
+        valid => {
+          if (valid) {
+            dispatch('getUserLocation', account).then(
+              location => dispatch('getUsers', location.geohash)
+            )
+          }
+        }
       )
       commit('SET_CURRENT_USER', account)
     })

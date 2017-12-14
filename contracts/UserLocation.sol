@@ -1,7 +1,8 @@
 pragma solidity ^0.4.18;
 
+import "./Owned.sol";
 
-contract UserLocation {
+contract UserLocation is Owned {
 
     struct LocationUser {
     bytes32 latitude;
@@ -18,8 +19,6 @@ contract UserLocation {
     uint index;
     }
 
-    address public owner;
-
     mapping (address => LocationUser) private locations;
 
     mapping (address => CheersItem) private cheersContracts;
@@ -33,10 +32,6 @@ contract UserLocation {
     event LogNewLocation(address indexed userAddress, bytes32 lat, bytes32 lon, bytes32 geohash);
 
     event LogDeleteLocation(address indexed userAddress, uint index, uint size);
-
-    function UserLocation() public {
-        owner = msg.sender;
-    }
 
     function hasLocation(address userAddress) public constant returns (bool) {
         if (geohashUsers[locations[userAddress].geohash].length == 0) return false;
@@ -89,9 +84,9 @@ contract UserLocation {
     }
 
     function deleteLocation() public returns (uint) {
-        require(hasLocation(msg.sender));
-        uint rowToDelete = locations[msg.sender].index;
-        bytes32 geohash = locations[msg.sender].geohash;
+        require(hasLocation(tx.origin));
+        uint rowToDelete = locations[tx.origin].index;
+        bytes32 geohash = locations[tx.origin].geohash;
         address keyToMove = geohashUsers[geohash][geohashUsers[geohash].length - 1];
         geohashUsers[geohash][rowToDelete] = keyToMove;
         locations[keyToMove].index = rowToDelete;
@@ -114,7 +109,8 @@ contract UserLocation {
 
     function isSpending(address _owner) public constant returns (bool) {
         if (cheersIndex.length == 0) return false;
-        return cheersIndex[locations[_owner].contractIndex] == locations[_owner].spendingContract;
+        bool isSpending = cheersIndex[locations[_owner].contractIndex] == locations[_owner].spendingContract;
+        return isSpending && CheersContract(locations[_owner].spendingContract).owner() == _owner;
     }
 
     function getSpendingOffer(address _owner) public constant returns (address) {
@@ -123,11 +119,19 @@ contract UserLocation {
     }
 
     function setSpendingOffer(address contractAddress) public returns (bool){
-        // require(msg.sender == owner);
-        // more complex checks for contract later
+        // Checking the requirements is not so strict about the
+        // ownership of the offer contract due to the fact this
+        // method is called from the offer constructor (to avoid
+        // requiring a two staged process in the client, for
+        // contract creation and registration) and at the construction
+        // runtime the contract can not be retrieved yet to check the owner
+        //
+        // To secure the behavior, the getter requires that the
+        // requesting user has a spending contract
+        require(!isSpending(tx.origin));
         cheersIndex.push(contractAddress);
-        locations[msg.sender].contractIndex = cheersIndex.length - 1;
-        locations[msg.sender].spendingContract = contractAddress;
+        locations[tx.origin].contractIndex = cheersIndex.length - 1;
+        locations[tx.origin].spendingContract = contractAddress;
         return true;
     }
 
@@ -137,6 +141,134 @@ contract UserLocation {
 
     function kill() public {
         require(owner == msg.sender);
+        selfdestruct(owner);
+    }
+}
+
+
+contract CheersContract is Owned {
+
+    enum ActivityType {Drinks, Tickets, Food}
+
+    address[] candidates;
+
+    address[] profiteers;
+
+    address[] cashedOut;
+
+    mapping (address => int) userStates;
+
+    ActivityType public activity;
+
+    uint public maxCandidates;
+
+    uint public firstContactBudget;
+
+    address userContract;
+
+    function CheersContract(uint _maxCandidates, uint _firstContactReward, ActivityType _activity, address _userContract) public payable {
+        // msg.value should be more than first contact reward times the candidates maximum
+        require(_maxCandidates == 0 || msg.value > _firstContactReward * _maxCandidates);
+
+        owner = tx.origin;
+        maxCandidates = _maxCandidates;
+        firstContactBudget = _firstContactReward * _maxCandidates;
+        activity = _activity;
+        userContract = _userContract;
+        UserLocation(userContract).setSpendingOffer(address(this));
+    }
+
+    function setUserContract(address contractAddress) public {
+        userContract = contractAddress;
+    }
+
+    function getCompensation() constant public returns (uint) {
+        return this.balance - firstContactBudget;
+    }
+
+    function isOpen() constant public returns (bool) {
+        return candidates.length + profiteers.length < maxCandidates;
+    }
+
+    function addAmount() public payable {
+        require(msg.sender == owner);
+    }
+
+    function setActivity(ActivityType _activity) public {
+        require(msg.sender == owner);
+        activity = _activity;
+    }
+
+    function addCandidate(address candidate) public returns (bool) {
+        require(candidate != owner);
+        require(isOpen());
+        require(userStates[candidate] == 0);
+
+        candidates.push(candidate);
+        userStates[candidate] = 1;
+        candidate.transfer(firstContactBudget / maxCandidates);
+        return true;
+    }
+
+    function addProfiteer(address _profiteer) public returns (bool) {
+        require(msg.sender == owner);
+        require(isOpen() || userStates[_profiteer] == 1);
+        require(userStates[_profiteer] < 2);
+
+        profiteers.push(_profiteer);
+        userStates[_profiteer] = 2;
+        return true;
+    }
+
+    function cashOut() public returns (bool) {
+        require(msg.sender == owner);
+        uint profiteersLength = profiteers.length;
+        for (uint i = 0; i < profiteers.length; i++) {
+            profiteers[i].transfer(getCompensation() / maxCandidates);
+            cashedOut.push(profiteers[i]);
+            userStates[profiteers[i]] = 3;
+            delete profiteers[i];
+        }
+        maxCandidates -= profiteersLength;
+        return true;
+    }
+
+    function isCandidate(address userAddress) public constant returns (bool) {
+        require(msg.sender == owner || msg.sender == userAddress);
+        return userStates[userAddress] == 1;
+    }
+
+    function isCashedOut(address userAddress) public constant returns (bool) {
+        require(msg.sender == owner || msg.sender == userAddress);
+        return userStates[userAddress] == 3;
+    }
+
+    function isProfiteer(address userAddress) public constant returns (bool) {
+        require(msg.sender == owner || msg.sender == userAddress);
+        return userStates[userAddress] == 2;
+    }
+
+    function getCandidates() public constant returns (address[]) {
+        require(msg.sender == owner);
+        return candidates;
+    }
+
+    function getProfiteers() public constant returns (address[]) {
+        require(msg.sender == owner);
+        return profiteers;
+    }
+
+    function getCashedOuts() public constant returns (address[]) {
+        require(msg.sender == owner);
+        return cashedOut;
+    }
+
+    function getCandidatesCount() public constant returns (uint) {
+        return candidates.length;
+    }
+
+    function kill() public {
+        require(msg.sender == owner);
         selfdestruct(owner);
     }
 }

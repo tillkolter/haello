@@ -88,7 +88,7 @@
           }
           createCheersContract(data).then(
             contract => {
-              this.$store.dispatch('setSpendingOffer', contract)
+              console.log('created contract ' + contract)
             }
           )
         } else {

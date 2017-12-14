@@ -68,6 +68,7 @@ export const createCheersContract = (options, transactionCallback, confirmationC
   let initialBalance = options.initialBalance
   let activity = options.activity
   let firstContactReward = options.firstContactReward
+
   if (!transactionCallback) {
     transactionCallback = function (transactionHash) {}
   }
@@ -78,7 +79,7 @@ export const createCheersContract = (options, transactionCallback, confirmationC
     receiptCallback = function (receipt) {}
   }
   let data = CheersContractArtifacts.bytecode
-  let params = [maxCandidates, firstContactReward, activity]
+  let params = [maxCandidates, firstContactReward, activity, contractManager.UserLocation.address]
 
   let cheersContract = new global.web3.eth.Contract(CheersContractArtifacts.abi)
   cheersContract.deploy({
@@ -117,6 +118,7 @@ export const observeIdentity = (fun) => {
 }
 
 export const setSpendingOffer = (address) => new Promise((resolve, reject) => {
+  console.log('setSPendingOffer')
   contractManager.UserLocation.setSpendingOffer(address).then(
     success => {
       resolve(success)
@@ -132,7 +134,7 @@ export const getSpendingOffer = (address, sender) => new Promise((resolve, rejec
   console.log(`get details on spending offer for user ${sender}`)
   let contract = new global.web3.eth.Contract(CheersContractArtifacts.abi, address)
   let getCompensation = contract.methods.getCompensation().call()
-  let getSpender = contract.methods.spender().call()
+  let getSpender = contract.methods.owner().call()
   let getActivity = contract.methods.activity().call()
   let getIsCandidate = contract.methods.isCandidate(sender).call({from: sender})
   let getIsOpen = contract.methods.isOpen().call()
@@ -158,13 +160,19 @@ export const getSpendingOffer = (address, sender) => new Promise((resolve, rejec
 })
 
 export const getUserSpendingOfferAddress = (address) => new Promise((resolve, reject) => {
-  contractManager.UserLocation.getSpendingOffer(address)
-    .then(data => resolve(data))
-    .catch(error => {
-      if (error) {
-        console.error('Bad Error ' + error)
+  contractManager.UserLocation.isSpending(address).then(
+    valid => {
+      if (valid) {
+        contractManager.UserLocation.getSpendingOffer(address)
+          .then(data => resolve(data))
+          .catch(error => {
+            if (error) {
+              console.error('Bad Error ' + error)
+            }
+          })
       }
-    })
+    }
+  )
 })
 
 export const addCandidate = (contractAddress, userAddress) => new Promise((resolve, reject) => {
@@ -172,9 +180,7 @@ export const addCandidate = (contractAddress, userAddress) => new Promise((resol
   console.log('addCandidate ' + userAddress)
   contract.methods.addCandidate(userAddress)
     .send({
-      from: userAddress,
-      gas: 2000000,
-      gasPrice: 10000000
+      from: userAddress
     }).on('transactionHash', (hash) => {
       console.log(hash)
     }).then(
@@ -212,4 +218,16 @@ export const cashOut = (contractAddress, sender) => new Promise((resolve, reject
     .catch((err) => {
       console.error(err)
     })
+})
+
+export const hasLocation = (address, sender) => new Promise((resolve, reject) => {
+  contractManager.UserLocation.hasLocation(address).then(
+    result => resolve(result)
+  )
+})
+
+export const isSpending = (address) => new Promise((resolve, reject) => {
+  contractManager.UserLocation.isSpending(address).then(
+    result => resolve(result)
+  )
 })

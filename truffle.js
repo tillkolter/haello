@@ -1,15 +1,14 @@
 var HDWalletProvider = require("truffle-hdwallet-provider")
 var config = require("./secrets")
 
-console.log(config.mnemonic)
-
 module.exports = {
   networks: {
-    develop: {
+    development: {
       host: "localhost",
       port: 9545,
       network_id: "*", // Match any network id
-      gas: 4600000
+      gas: 4600000,
+      from: "0x627306090abab3a6e1400e9345bc60c78a8bef57"
     },
     kovan: {
         provider: function() {
@@ -17,7 +16,7 @@ module.exports = {
         },
         network_id: 42,
         gas: 4700000
-    }   
+    }
   // },
   // solc: {
   //   optimizer: {

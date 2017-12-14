@@ -1,8 +1,7 @@
 import Web3 from 'web3'
 import {
   addCandidate, getCandidates,
-  getSpendingOffer, getUserSpendingOfferAddress, observeIdentity,
-  setSpendingOffer
+  getSpendingOffer, getUserSpendingOfferAddress, observeIdentity
 } from '../../utils/blockchain'
 
 const state = {
@@ -32,9 +31,6 @@ const actions = {
     observeIdentity(function (account) {
       commit('SET_IDENTITY', account)
     })
-  },
-  setSpendingOffer ({commit}, offer) {
-    setSpendingOffer(offer.options.address)
   },
   getUserSpendingOfferAddress ({commit, getters, dispatch}, account) {
     getUserSpendingOfferAddress(account).then(
